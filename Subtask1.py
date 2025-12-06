@@ -7,7 +7,8 @@ import math
 from tqdm import tqdm
 import random
 from sklearn.model_selection import train_test_split
-
+import word_count
+from tf_idf import pol_texts
 
 datapath = "subtask1/train/eng.csv"
 
@@ -49,6 +50,8 @@ def preprocess(text):
 # Read in positive and negative words from the text files
 path_to_negatives = "negative-words.txt"
 negative_words = []
+pol_words = word_count.pol_words
+print(pol_words)
 with open(path_to_negatives, "r") as file:
     for line in file:
         text = line.rstrip()
@@ -58,9 +61,14 @@ def get_negative_tokens(text):
     negative_tokens_found = [token for token in text if token in negative_words]
     return len(negative_tokens_found)
 
+def get_polarizing_tokens(text):
+    polarizing_tokens_found = [token for token in text if token in pol_words]
+    return len(polarizing_tokens_found)
+
 def extract_features(text):
     features = []
     features.append(get_negative_tokens(text))
+    features.append(get_polarizing_tokens(text))
 
     return features
 
@@ -327,9 +335,9 @@ dev_features = standardize(dev_features)
 # Epochs and learning rate should be experimented with
 # The model is the SentimentClassifier
 
-# YOUR CODE HERE
+num_features = len(extract_features(train_texts))
 num_epochs = 100
-model = SentimentClassifier(input_dim=1)
+model = SentimentClassifier(input_dim=num_features)
 learning_rate = 0.01
 optimizer = make_optimizer(model, learning_rate)
 

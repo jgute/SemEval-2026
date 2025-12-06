@@ -34,6 +34,11 @@ def get_pol_texts(dataset_in):
     pol_texts = pol_data['text'].values
     return pol_texts
 
+def get_nonpol_texts(dataset_in):
+    nonpol_data = dataset_in[dataset_in['polarization'] == 0]
+    nonpol_texts = nonpol_data['text'].values
+    return nonpol_texts
+
 def most_common_words(text):
     word_counts = dict()
     words = [word.lower() for sentence in text for word in sentence.split()]
@@ -50,8 +55,17 @@ def most_common_words(text):
         else:
             word_counts[word] = 1
 
-    print(sorted(word_counts.items(), reverse=True, key=lambda item: item[1])[:10])
+    word_counts = list(word_counts.items())
 
-most_common_words(pol_texts)
-most_common_words(get_pol_texts(spa_dataset))
-most_common_words(get_pol_texts(deu_dataset))
+    top_50 = sorted(word_counts, key=lambda item: item[1], reverse=True)[:50]
+    return [word for word, count in top_50]
+
+pol_words = most_common_words(get_pol_texts(eng_dataset))
+
+print(most_common_words(get_pol_texts(eng_dataset)))
+print(most_common_words(get_pol_texts(spa_dataset)))
+print(most_common_words(get_pol_texts(deu_dataset)))
+
+print(most_common_words(get_nonpol_texts(eng_dataset)))
+print(most_common_words(get_nonpol_texts(spa_dataset)))
+print(most_common_words(get_nonpol_texts(deu_dataset)))
