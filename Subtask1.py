@@ -51,6 +51,7 @@ def preprocess(text):
 path_to_negatives = "negative-words.txt"
 negative_words = []
 pol_words = word_count.pol_words
+nonpol_words = word_count.nonpol_words
 print(pol_words)
 with open(path_to_negatives, "r") as file:
     for line in file:
@@ -65,11 +66,15 @@ def get_polarizing_tokens(text):
     polarizing_tokens_found = [token for token in text if token in pol_words]
     return len(polarizing_tokens_found)
 
+def get_nonpolarizing_tokens(text):
+    nonpolarizing_tokens_found = [token for token in text if token in nonpol_words]
+    return len(nonpolarizing_tokens_found)
+
 def extract_features(text):
     features = []
     features.append(get_negative_tokens(text))
     features.append(get_polarizing_tokens(text))
-
+    features.append(get_nonpolarizing_tokens(text))
     return features
 
 def featurize_data(texts, labels):

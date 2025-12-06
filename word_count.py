@@ -61,6 +61,7 @@ def most_common_words(text):
     return [word for word, count in top_50]
 
 pol_words = most_common_words(get_pol_texts(eng_dataset))
+nonpol_words = most_common_words(get_nonpol_texts(eng_dataset))
 
 print(most_common_words(get_pol_texts(eng_dataset)))
 print(most_common_words(get_pol_texts(spa_dataset)))
