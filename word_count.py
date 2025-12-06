@@ -1,0 +1,57 @@
+import string
+
+import nltk
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+import numpy as np
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
+
+eng_datapath = "subtask1/train/eng.csv"
+spa_datapath = "subtask1/train/spa.csv"
+deu_datapath = "subtask1/train/deu.csv"
+
+eng_dataset = pd.read_csv(eng_datapath)
+spa_dataset = pd.read_csv(spa_datapath)
+deu_dataset = pd.read_csv(deu_datapath)
+
+#load data into separate np arrays based on corresponding conditions
+pol_data = eng_dataset[eng_dataset['polarization'] == 1]
+nonpol_data = eng_dataset[eng_dataset['polarization'] == 0]
+pol_data_count = len(pol_data)
+nonpol_data_count = len(nonpol_data)
+
+all_texts = eng_dataset['text'].values
+all_labels = eng_dataset[('polarization')].values
+
+pol_texts = pol_data['text'].values
+nonpol_texts = nonpol_data['text'].values
+
+def get_pol_texts(dataset_in):
+    pol_data = dataset_in[dataset_in['polarization'] == 1]
+    pol_texts = pol_data['text'].values
+    return pol_texts
+
+def most_common_words(text):
+    word_counts = dict()
+    words = [word.lower() for sentence in text for word in sentence.split()]
+
+    nltk.download('stopwords')
+
+    # remove stopwords
+    spa_stopwords = stopwords.words('spanish')
+    eng_stopwords = stopwords.words('english')
+    deu_stopwords = stopwords.words('german')
+    words = [word for word in words if word not in eng_stopwords and word not in spa_stopwords and word not in deu_stopwords]
+
+    for word in words:
+        if word in word_counts:
+            word_counts[word] += 1
+        else:
+            word_counts[word] = 1
+
+    print(sorted(word_counts.items(), reverse=True, key=lambda item: item[1])[:10])
+
+most_common_words(pol_texts)
+most_common_words(get_pol_texts(spa_dataset))
+most_common_words(get_pol_texts(deu_dataset))

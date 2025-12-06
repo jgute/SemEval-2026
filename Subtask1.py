@@ -13,7 +13,7 @@ datapath = "subtask1/train/eng.csv"
 
 dataset = pd.read_csv(datapath)
 
-#load data into separate np arrays based on corresponding conditions
+#load data into separate pandas dataframes based on corresponding conditions
 pol_data = dataset[dataset['polarization'] == 1]
 nonpol_data = dataset[dataset['polarization'] == 0]
 
@@ -344,3 +344,39 @@ trained_model, train_losses, dev_losses = training_loop(
     optimizer,
     model
 )
+
+# Random Classifier
+def predict_random(train_labels, num_samples):
+   """
+   Using the label distribution, predict the label num_sample number of times
+
+
+   Args:
+       train_labels np.ndarray(int)
+       num_samples: int
+   Returns:
+       predictions np.ndarray(int, num_samples)
+   """
+
+
+   pos_count = 0
+   neg_count = 0
+
+
+   for label in train_labels:
+       if label == 1:
+           pos_count += 1
+       else:
+           neg_count += 1
+
+   pos_prob = pos_count / (pos_count + neg_count)
+
+   predictions = random.choices(population=[1, 0], weights=[pos_prob, (1 - pos_prob)], k=num_samples)
+
+   return np.array(predictions, dtype=int)
+
+# random classifier baseline
+devset_prediction_random = predict_random(train_labels, num_samples=len(dev_labels))
+dev_random_f1 = f1_score(devset_prediction_random, dev_labels)
+print('\nRandom Chance F1:', dev_random_f1)
+# should be 0.5, but is instead ~0.3???
