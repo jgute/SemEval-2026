@@ -9,7 +9,7 @@ import random
 from sklearn.model_selection import train_test_split
 
 
-datapath = "/Users/jonahgutenberg/Desktop/all/CLASIC/NLP/SemEval-2026/subtask1/train/eng.csv"
+datapath = "subtask1/train/eng.csv"
 
 dataset = pd.read_csv(datapath)
 
@@ -47,7 +47,7 @@ def preprocess(text):
     return tokens
 
 # Read in positive and negative words from the text files
-path_to_negatives = "/Users/jonahgutenberg/Desktop/all/CLASIC/NLP/SemEval-2026/negative-words.txt"
+path_to_negatives = "negative-words.txt"
 negative_words = []
 with open(path_to_negatives, "r") as file:
     for line in file:
