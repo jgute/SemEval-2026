@@ -7,6 +7,8 @@ import numpy as np
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 
+nltk.download('stopwords')
+
 eng_datapath = "subtask1/train/eng.csv"
 spa_datapath = "subtask1/train/spa.csv"
 deu_datapath = "subtask1/train/deu.csv"
@@ -35,8 +37,6 @@ def get_pol_texts(dataset_in):
 def most_common_words(text):
     word_counts = dict()
     words = [word.lower() for sentence in text for word in sentence.split()]
-
-    nltk.download('stopwords')
 
     # remove stopwords
     spa_stopwords = stopwords.words('spanish')
