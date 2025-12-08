@@ -2,6 +2,7 @@ import string
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
+import nltk
 
 datapath = "subtask1/train/eng.csv"
 
@@ -14,55 +15,54 @@ pol_data_count = len(pol_data)
 nonpol_data_count = len(nonpol_data)
 
 all_texts = dataset['text'].values
-all_labels = dataset[('polarization')].values
+all_labels = dataset['polarization'].values
 
 pol_texts = pol_data['text'].values
 nonpol_texts = nonpol_data['text'].values
 
 full_pol_text = pol_data['text'].str.cat(sep=" ")
 full_nonpol_text = nonpol_data['text'].str.cat(sep=" ")
+full_text = full_pol_text + " " + full_nonpol_text
+
+pol_data_copy = pol_data.copy()
+pol_data_copy.loc[:, 'tokens'] = pol_data_copy['text'].map(lambda x: nltk.word_tokenize(x.lower()))
+print("tokenized", print(pol_data_copy[:5]))
 
 
 tfidf = TfidfVectorizer(stop_words='english')
-result = tfidf.fit_transform([full_pol_text, full_nonpol_text])
 
-print('\nWord indexes:')
-print(tfidf.vocabulary_)
-print('\ntf-idf value:')
-print(result)
-print('\ntf-idf values in matrix form:')
-print(result.toarray())
+pol_input = [full_pol_text, full_text]
+nonpol_input = [full_nonpol_text, full_text]
 
-data = result.data
-indices = result.indices    # column indices
-indptr = result.indptr      # row pointer
+def get_top_tfidf_words(text):
+    result = tfidf.fit_transform(text)
+    # Row 0 is full_pol_text
+    pol_vector = result.toarray()[0]
 
-# find the indices in `data` corresponding to the 5 largest values
-top5_idx = np.argsort(data)[:30]   # indices into the data array
-top5_vals = data[top5_idx]
+    # Get feature names (words)
+    words = np.array(tfidf.get_feature_names_out())
 
-top5 = []
+    # Get indices of top 10 values
+    top_n = 100
+    top_indices = pol_vector.argsort()[::-1][:top_n]
 
-for idx in top5_idx:
-    # find row number using `indptr`
-    row = np.searchsorted(indptr, idx, side="right") - 1
-    col = indices[idx]
-    val = data[idx]
-    top5.append((row, col, val))
+    # Extract words + scores
+    top_words = words[top_indices]
+    top_scores = pol_vector[top_indices]
 
-feature_names = tfidf.get_feature_names_out()
+    return top_words
 
-top5_words = [
-    (row, col, val, feature_names[col])
-    for (row, col, val) in top5
-]
+    # print("\nTop 10 TF-IDF words:\n")
+    # for word, score in zip(top_words, top_scores):
+    #     print(f"{word}: {score:.6f}")
 
-for row, col, val, word in sorted(top5_words, key=lambda x: -x[2]):
-    print(f"Row {row}, Word '{word}', TF-IDF={val:.5f}")
 
-print(result.toarray())
+# print('\nWord indexes:')
+# print(tfidf.vocabulary_)
+# print('\ntf-idf value:')
+# print(result)
+# print('\ntf-idf values in matrix form:')
+# print(result.toarray())
 
-top5_idx = np.argsort(pol_texts)[-30:]
-top5_vals = pol_texts[top5_idx]
-
-print(top5_vals)
+pol_top_tfidf = get_top_tfidf_words(pol_input)
+nonpol_top_tfidf = get_top_tfidf_words(nonpol_input)

@@ -7,8 +7,11 @@ import math
 from tqdm import tqdm
 import random
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import f1_score
 import word_count
-from tf_idf import pol_texts
+from tf_idf import pol_top_tfidf
+from tf_idf import nonpol_top_tfidf
+from word2vec import w2v_model
 
 datapath = "subtask1/train/eng.csv"
 
@@ -19,18 +22,20 @@ pol_data = dataset[dataset['polarization'] == 1]
 nonpol_data = dataset[dataset['polarization'] == 0]
 
 all_texts = dataset['text'].values
-all_labels = dataset[('polarization')].values
+all_labels = dataset['polarization'].values
 
 #validate data load
-print("example data:")
-for i in range(3):
-    print(pol_data['text'].values[i], "(polarization = 1)")
-    print(nonpol_data['text'].values[i], "(polarization = 0)")
+def validate_data():
+    print("example data:")
+    for i in range(3):
+        print(pol_data['text'].values[i], "(polarization = 1)")
+        print(nonpol_data['text'].values[i], "(polarization = 0)")
 
-print(f"There are {len(pol_data)} positive labels.")
-print(f"There are {len(nonpol_data)} negative labels.")
-print(all_labels)
+    print(f"There are {len(pol_data)} positive labels.")
+    print(f"There are {len(nonpol_data)} negative labels.")
+    print(all_labels)
 
+#validate_data()
 
 def split_dataset(texts, labels):
     tr_texts, de_texts, tr_labels, de_labels = train_test_split(texts, labels, test_size=.2, random_state=42)
@@ -50,9 +55,11 @@ def preprocess(text):
 # Read in positive and negative words from the text files
 path_to_negatives = "negative-words.txt"
 negative_words = []
-pol_words = word_count.pol_words
-nonpol_words = word_count.nonpol_words
-print(pol_words)
+#pol_words = word_count.pol_words
+#nonpol_words = word_count.nonpol_words
+pol_words = pol_top_tfidf
+nonpol_words = nonpol_top_tfidf
+# print(pol_words)
 with open(path_to_negatives, "r") as file:
     for line in file:
         text = line.rstrip()
@@ -62,9 +69,26 @@ def get_negative_tokens(text):
     negative_tokens_found = [token for token in text if token in negative_words]
     return len(negative_tokens_found)
 
+def get_w2f_vectors(text):
+    vectors = []
+    for word in text:
+        if word in w2v_model.wv:
+            vectors.append(w2v_model.wv[word])
+    return vectors
+
+def get_avg_vector(text):
+    vecs = get_w2f_vectors(text)
+    if len(vecs) > 0:
+        return np.mean(vecs, axis=0)
+    else:
+        return np.zeros(w2v_model.vector_size)
+
 def get_polarizing_tokens(text):
     polarizing_tokens_found = [token for token in text if token in pol_words]
     return len(polarizing_tokens_found)
+
+def get_word_count(text):
+    return len(text)
 
 def get_nonpolarizing_tokens(text):
     nonpolarizing_tokens_found = [token for token in text if token in nonpol_words]
@@ -75,6 +99,9 @@ def extract_features(text):
     features.append(get_negative_tokens(text))
     features.append(get_polarizing_tokens(text))
     features.append(get_nonpolarizing_tokens(text))
+    #features.append(get_avg_vector(text))
+    features.append(get_word_count(text))
+
     return features
 
 def featurize_data(texts, labels):

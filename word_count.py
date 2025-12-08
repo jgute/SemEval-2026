@@ -47,7 +47,8 @@ def most_common_words(text):
     spa_stopwords = stopwords.words('spanish')
     eng_stopwords = stopwords.words('english')
     deu_stopwords = stopwords.words('german')
-    words = [word for word in words if word not in eng_stopwords and word not in spa_stopwords and word not in deu_stopwords]
+    all_stopwords = spa_stopwords + eng_stopwords + deu_stopwords
+    words = [word for word in words if word not in all_stopwords]
 
     for word in words:
         if word in word_counts:
@@ -57,16 +58,18 @@ def most_common_words(text):
 
     word_counts = list(word_counts.items())
 
-    top_50 = sorted(word_counts, key=lambda item: item[1], reverse=True)[:50]
-    return [word for word, count in top_50]
+    n = 100
+
+    top_n = sorted(word_counts, key=lambda item: item[1], reverse=True)[:n]
+    return [word for word, count in top_n]
 
 pol_words = most_common_words(get_pol_texts(eng_dataset))
 nonpol_words = most_common_words(get_nonpol_texts(eng_dataset))
-
-print(most_common_words(get_pol_texts(eng_dataset)))
-print(most_common_words(get_pol_texts(spa_dataset)))
-print(most_common_words(get_pol_texts(deu_dataset)))
-
-print(most_common_words(get_nonpol_texts(eng_dataset)))
-print(most_common_words(get_nonpol_texts(spa_dataset)))
-print(most_common_words(get_nonpol_texts(deu_dataset)))
+#
+# print(most_common_words(get_pol_texts(eng_dataset)))
+# print(most_common_words(get_pol_texts(spa_dataset)))
+# print(most_common_words(get_pol_texts(deu_dataset)))
+#
+# print(most_common_words(get_nonpol_texts(eng_dataset)))
+# print(most_common_words(get_nonpol_texts(spa_dataset)))
+# print(most_common_words(get_nonpol_texts(deu_dataset)))
