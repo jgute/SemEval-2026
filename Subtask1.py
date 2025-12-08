@@ -12,6 +12,7 @@ import word_count
 from tf_idf import pol_top_tfidf
 from tf_idf import nonpol_top_tfidf
 from word2vec import w2v_model
+import keyness
 
 datapath = "subtask1/train/eng.csv"
 
@@ -55,8 +56,8 @@ def preprocess(text):
 # Read in positive and negative words from the text files
 path_to_negatives = "negative-words.txt"
 negative_words = []
-#pol_words = word_count.pol_words
-#nonpol_words = word_count.nonpol_words
+high_freq_pol_words = word_count.pol_words
+high_freq_nonpol_words = word_count.nonpol_words
 pol_words = pol_top_tfidf
 nonpol_words = nonpol_top_tfidf
 # print(pol_words)
@@ -87,20 +88,34 @@ def get_polarizing_tokens(text):
     polarizing_tokens_found = [token for token in text if token in pol_words]
     return len(polarizing_tokens_found)
 
-def get_word_count(text):
-    return len(text)
-
 def get_nonpolarizing_tokens(text):
     nonpolarizing_tokens_found = [token for token in text if token in nonpol_words]
     return len(nonpolarizing_tokens_found)
+
+def get_word_count(text):
+    return len(text)
+
+def get_high_freq_pol_words(text):
+    high_freq_pol_words_found = [token for token in text if token in high_freq_pol_words]
+    return len(high_freq_pol_words_found)
+
+def get_high_freq_nonpol_words(text):
+    high_freq_nonpol_words_found = [token for token in text if token in high_freq_nonpol_words]
+    return len(high_freq_nonpol_words_found)
+
+def get_keyness_log_ratio(text):
+    return keyness.get_keyness(text)
 
 def extract_features(text):
     features = []
     features.append(get_negative_tokens(text))
     features.append(get_polarizing_tokens(text))
     features.append(get_nonpolarizing_tokens(text))
+    features.append(get_high_freq_pol_words(text))
+    features.append(get_high_freq_nonpol_words(text))
     #features.append(get_avg_vector(text))
     features.append(get_word_count(text))
+    features.append(get_keyness_log_ratio(text))
 
     return features
 
