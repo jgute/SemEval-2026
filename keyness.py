@@ -25,10 +25,8 @@ full_text = dataset['text'].str.cat(sep=" ")
 def corpus_freq(text):
     freq = {}
     for word in text:
-        # the first time we see a particular word we create a key:value pair
         if word not in freq:
             freq[word] = 1
-        # when we see a word subsequent times, we add (+=) one to the frequency count
         else:
             freq[word] += 1
     return freq
