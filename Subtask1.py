@@ -1,17 +1,13 @@
-import numpy as np
-import random
 import torch
-from typing import List
 import pandas as pd
 import math
+
 from tqdm import tqdm
 import random
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 import word_count
-from tf_idf import pol_top_tfidf
-from tf_idf import nonpol_top_tfidf
-from word2vec import w2v_model
+from tf_idf import pol_top_tfidf_eng, nonpol_top_tfidf_eng
 import keyness
 
 datapath = "subtask1/train/eng.csv"
@@ -24,19 +20,6 @@ nonpol_data = dataset[dataset['polarization'] == 0]
 
 all_texts = dataset['text'].values
 all_labels = dataset['polarization'].values
-
-#validate data load
-def validate_data():
-    print("example data:")
-    for i in range(3):
-        print(pol_data['text'].values[i], "(polarization = 1)")
-        print(nonpol_data['text'].values[i], "(polarization = 0)")
-
-    print(f"There are {len(pol_data)} positive labels.")
-    print(f"There are {len(nonpol_data)} negative labels.")
-    print(all_labels)
-
-#validate_data()
 
 def split_dataset(texts, labels):
     tr_texts, de_texts, tr_labels, de_labels = train_test_split(texts, labels, test_size=.2, random_state=42)
@@ -58,9 +41,9 @@ path_to_negatives = "negative-words.txt"
 negative_words = []
 high_freq_pol_words = word_count.pol_words
 high_freq_nonpol_words = word_count.nonpol_words
-pol_words = pol_top_tfidf
-nonpol_words = nonpol_top_tfidf
-# print(pol_words)
+pol_words = pol_top_tfidf_eng
+nonpol_words = nonpol_top_tfidf_eng
+
 with open(path_to_negatives, "r") as file:
     for line in file:
         text = line.rstrip()
@@ -69,20 +52,6 @@ with open(path_to_negatives, "r") as file:
 def get_negative_tokens(text):
     negative_tokens_found = [token for token in text if token in negative_words]
     return len(negative_tokens_found)
-
-def get_w2f_vectors(text):
-    vectors = []
-    for word in text:
-        if word in w2v_model.wv:
-            vectors.append(w2v_model.wv[word])
-    return vectors
-
-def get_avg_vector(text):
-    vecs = get_w2f_vectors(text)
-    if len(vecs) > 0:
-        return np.mean(vecs, axis=0)
-    else:
-        return np.zeros(w2v_model.vector_size)
 
 def get_polarizing_tokens(text):
     polarizing_tokens_found = [token for token in text if token in pol_words]
@@ -104,7 +73,7 @@ def get_high_freq_nonpol_words(text):
     return len(high_freq_nonpol_words_found)
 
 def get_keyness_log_ratio(text):
-    return keyness.get_keyness(text)
+    return keyness.get_log_ratio(text)
 
 def extract_features(text):
     features = []
@@ -113,7 +82,6 @@ def extract_features(text):
     features.append(get_nonpolarizing_tokens(text))
     features.append(get_high_freq_pol_words(text))
     features.append(get_high_freq_nonpol_words(text))
-    #features.append(get_avg_vector(text))
     features.append(get_word_count(text))
     features.append(get_keyness_log_ratio(text))
 
@@ -171,7 +139,7 @@ class SentimentClassifier(torch.nn.Module):
         initialize_weights(self.coefficients)
 
     def forward(self, features: torch.Tensor):
-        # We predict a number by multipling by the coefficients
+        # We predict a number by multiplying by the coefficients
         # and then take the sigmoid to turn the score as logits
         return torch.sigmoid(self.coefficients(features))
 
@@ -219,103 +187,6 @@ def predict(model, features):
         return predicted_labels
 
 
-def accuracy(predicted_labels, true_labels):
-    """
-    Accuracy is correct predictions / all predicitons
-
-    Args:
-        predicted_labels (np.ndarray[int, 1]): the integer labels from the predictions. Uni-dimensional
-        true_labels (np.ndarray[int, 1]): the integer labels from the gold standard. Uni-dimensional
-
-    Returns:
-        accuracy_value (double)
-
-    """
-    accuracy_value = 0.
-    correct_predictions = 0
-    all_predictions = len(predicted_labels)
-
-    for i in range(len(predicted_labels)):
-        if predicted_labels[i] == true_labels[i]:
-            correct_predictions += 1
-
-    accuracy_value = correct_predictions / all_predictions
-
-    return accuracy_value
-
-
-def precision(predicted_labels, true_labels):
-    """
-    Precision is True Positives / All Positives Predictions
-
-    Args:
-        predicted_labels (np.ndarray[int, 1]): the integer labels from the predictions. Uni-dimensional
-        true_labels (np.ndarray[int, 1]): the integer labels from the gold standard. Uni-dimensional
-
-    Returns:
-        precision_value (double)
-
-    """
-    precision_value = 0.
-    true_positives = 0
-    all_positives = 0
-
-    for i in range(len(predicted_labels)):
-        if predicted_labels[i] == 1:
-            all_positives += 1
-        if predicted_labels[i] == true_labels[i] and predicted_labels[i] == 1:
-            true_positives += 1
-
-    precision_value = true_positives / all_positives
-
-    return precision_value
-
-
-def recall(predicted_labels, true_labels):
-    """
-    Recall is True Positives / All Positive Labels
-
-    Args:
-        predicted_labels (np.ndarray[int, 1]): the integer labels from the predictions. Uni-dimensional
-        true_labels (np.ndarray[int, 1]): the integer labels from the gold standard. Uni-dimensional
-
-    Returns:
-        recall_value (double)
-
-    """
-    recall_value = 0.
-    true_positives = 0
-    all_positives = 0
-
-    for i in range(len(predicted_labels)):
-        if true_labels[i] == 1:
-            all_positives += 1
-        if predicted_labels[i] == true_labels[i] and predicted_labels[i] == 1:
-            true_positives += 1
-
-    recall_value = true_positives / all_positives
-
-    return recall_value
-
-
-def f1_score(predicted_labels, true_labels):
-    """
-    F1 score is the harmonic mean of precision and recall
-
-    Args:
-        predicted_labels (np.ndarray[int, 1]): the integer labels from the predictions. Uni-dimensional
-        true_labels (np.ndarray[int, 1]): the integer labels from the gold standard. Uni-dimensional
-
-    Returns:
-        f1_score_value (double)
-
-    """
-    f1_score_value = 0.
-
-    denominator = (1 / precision(predicted_labels, true_labels)) + (1 / recall(predicted_labels, true_labels))
-    f1_score_value = 2 / denominator
-
-    return f1_score_value
 
 def training_loop(
         num_epochs,
@@ -362,7 +233,7 @@ def training_loop(
             dev_losses.append(dev_loss.item())
 
         # Estimate the f1 score for the development set
-        dev_f1 = f1_score(predict(model, dev_features), dev_labels.tolist())
+        dev_f1 = f1_score(dev_labels.tolist(), predict(model, dev_features))
         print(f"epoch {i}")
         print(f"Train loss: {sum(train_losses) / len(train_losses)}")
         print(f"Dev loss: {sum(dev_losses) / len(dev_losses)}")
@@ -383,7 +254,7 @@ dev_features = standardize(dev_features)
 # The model is the SentimentClassifier
 
 num_features = len(extract_features(train_texts))
-num_epochs = 100
+num_epochs = 30
 model = SentimentClassifier(input_dim=num_features)
 learning_rate = 0.01
 optimizer = make_optimizer(model, learning_rate)
@@ -399,39 +270,3 @@ trained_model, train_losses, dev_losses = training_loop(
     optimizer,
     model
 )
-
-# Random Classifier
-def predict_random(train_labels, num_samples):
-   """
-   Using the label distribution, predict the label num_sample number of times
-
-
-   Args:
-       train_labels np.ndarray(int)
-       num_samples: int
-   Returns:
-       predictions np.ndarray(int, num_samples)
-   """
-
-
-   pos_count = 0
-   neg_count = 0
-
-
-   for label in train_labels:
-       if label == 1:
-           pos_count += 1
-       else:
-           neg_count += 1
-
-   pos_prob = pos_count / (pos_count + neg_count)
-
-   predictions = random.choices(population=[1, 0], weights=[pos_prob, (1 - pos_prob)], k=num_samples)
-
-   return np.array(predictions, dtype=int)
-
-# random classifier baseline
-devset_prediction_random = predict_random(train_labels, num_samples=len(dev_labels))
-dev_random_f1 = f1_score(devset_prediction_random, dev_labels)
-print('\nRandom Chance F1:', dev_random_f1)
-# should be 0.5, but is instead ~0.3???
