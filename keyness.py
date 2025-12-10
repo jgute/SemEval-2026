@@ -1,8 +1,7 @@
 import math
 import pandas as pd
 
-
-datapath = "subtask1/train/eng_new.csv"
+datapath = "subtask1/train/eng.csv"
 
 dataset = pd.read_csv(datapath)
 
@@ -19,7 +18,8 @@ nonpol_texts = nonpol_data['text'].values
 
 full_pol_text = pol_data['text'].str.cat(sep=" ")
 full_nonpol_text = nonpol_data['text'].str.cat(sep=" ")
-full_text = full_pol_text + " " + full_nonpol_text
+
+full_text = dataset['text'].str.cat(sep=" ")
 
 # adapted from https://kristopherkyle.github.io/corpus-analysis-python/Python_Tutorial_7.html
 def corpus_freq(text):

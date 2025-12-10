@@ -3,7 +3,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import nltk
 
-eng_datapath = "subtask1/train/eng_new.csv"
+eng_datapath = "subtask1/train/eng.csv"
 spa_datapath = "subtask1/train/spa.csv"
 deu_datapath = "subtask1/train/deu.csv"
 

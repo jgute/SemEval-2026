@@ -4,7 +4,7 @@ from nltk.corpus import stopwords
 
 nltk.download('stopwords')
 
-eng_datapath = "subtask1/train/eng_new.csv"
+eng_datapath = "subtask1/train/eng.csv"
 spa_datapath = "subtask1/train/spa.csv"
 deu_datapath = "subtask1/train/deu.csv"
 
