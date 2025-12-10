@@ -37,8 +37,6 @@ path_to_negatives = "negative-words.txt"
 positive_words, negative_words = [], []
 high_freq_pol_words = word_count.pol_words
 high_freq_nonpol_words = word_count.nonpol_words
-pol_words = pol_top_tfidf_eng
-nonpol_words = nonpol_top_tfidf_eng
 
 with open(path_to_negatives, "r") as file:
     for line in file:
@@ -57,14 +55,6 @@ def get_negative_tokens(text):
 def get_positive_tokens(text):
     positive_tokens_found = [token for token in text if token in positive_words]
     return len(positive_tokens_found)
-
-def get_polarizing_tokens(text):
-    polarizing_tokens_found = [token for token in text if token in pol_words]
-    return len(polarizing_tokens_found)
-
-def get_nonpolarizing_tokens(text):
-    nonpolarizing_tokens_found = [token for token in text if token in nonpol_words]
-    return len(nonpolarizing_tokens_found)
 
 def get_word_count(text):
     return len(text)
