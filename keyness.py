@@ -1,11 +1,11 @@
 import math
 import pandas as pd
 
-datapath = "subtask1/train/eng.csv"
+
+datapath = "subtask1/train/eng_new.csv"
 
 dataset = pd.read_csv(datapath)
 
-# load data into separate np arrays based on corresponding conditions
 pol_data = dataset[dataset['polarization'] == 1]
 nonpol_data = dataset[dataset['polarization'] == 0]
 pol_data_count = len(pol_data)
@@ -75,10 +75,6 @@ def keyness(freq_dict1,freq_dict2):
     return keyness_dict
 
 def preprocess(text):
-    """
-    Takes a string of text and returns a list of the whitespace-separated and lowercased tokens.
-    """
-
     tokens = text.lower().split()
 
     return tokens
@@ -86,20 +82,26 @@ def preprocess(text):
 pol_freq = corpus_freq(preprocess(full_pol_text))
 nonpol_freq = corpus_freq(preprocess(full_nonpol_text))
 
-print(pol_freq)
-print(nonpol_freq)
-
 keynesses = keyness(pol_freq,nonpol_freq)
 
-print(keynesses['log-ratio'])
-
-# given a list of words, return average log-ratio of all words
-def get_keyness(text):
+def get_log_ratio(text):
     sum = 0.0
     for word in text:
         if word in keynesses['log-ratio'].keys():
             sum += keynesses['log-ratio'][word]
     return sum / len(text)
 
-print(get_keyness(['agreeing']))
+def get_perc_diff(text):
+    sum = 0.0
+    for word in text:
+        if word in keynesses['%diff'].keys():
+            sum += keynesses['%diff'][word]
+    return sum / len(text)
+
+def get_odds_ratio(text):
+    sum = 0.0
+    for word in text:
+        if word in keynesses['odds-ratio'].keys():
+            sum += keynesses['odds-ratio'][word]
+    return sum / len(text)
 

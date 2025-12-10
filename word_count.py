@@ -1,15 +1,10 @@
-import string
-
 import nltk
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-import numpy as np
 from nltk.corpus import stopwords
-from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 
 nltk.download('stopwords')
 
-eng_datapath = "subtask1/train/eng.csv"
+eng_datapath = "subtask1/train/eng_new.csv"
 spa_datapath = "subtask1/train/spa.csv"
 deu_datapath = "subtask1/train/deu.csv"
 
@@ -65,11 +60,3 @@ def most_common_words(text):
 
 pol_words = most_common_words(get_pol_texts(eng_dataset))
 nonpol_words = most_common_words(get_nonpol_texts(eng_dataset))
-#
-# print(most_common_words(get_pol_texts(eng_dataset)))
-# print(most_common_words(get_pol_texts(spa_dataset)))
-# print(most_common_words(get_pol_texts(deu_dataset)))
-#
-# print(most_common_words(get_nonpol_texts(eng_dataset)))
-# print(most_common_words(get_nonpol_texts(spa_dataset)))
-# print(most_common_words(get_nonpol_texts(deu_dataset)))
