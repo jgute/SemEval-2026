@@ -5,7 +5,7 @@ import emoji
 
 
 
-eng_datapath = "subtask1/train/eng.csv"
+eng_datapath = "subtask1/train/eng_new.csv"
 
 eng_dataset = pd.read_csv(eng_datapath)
 
@@ -17,10 +17,6 @@ deu_datapath = "subtask1/train/deu.csv"
 
 deu_dataset = pd.read_csv(deu_datapath)
 
-#get emoji count
-#average emoji usage
-#average word count
-#
 
 def load_data(data):
     pol_dataset = data[data['polarization'] == 1]

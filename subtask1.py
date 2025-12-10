@@ -12,7 +12,7 @@ import keyness
 from sklearn.metrics import ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
-datapath = "subtask1/train/eng.csv"
+datapath = "subtask1/train/deu.csv"
 dataset = pd.read_csv(datapath)
 
 pol_data = dataset[dataset['polarization'] == 1]
@@ -209,7 +209,7 @@ optimizer = make_optimizer(model, learning_rate)
 
 trained_model, train_losses, dev_losses = training_loop(
     num_epochs,
-    15,
+    16,
     train_features,
     train_labels_tensor,
     dev_features,
@@ -218,7 +218,7 @@ trained_model, train_losses, dev_losses = training_loop(
     model
 )
 
-def write_final_predictions_csv(model, dev_texts, dev_labels, dev_ids, output_csv="subtask_1/pred_eng.csv"):
+def write_final_predictions_csv(model, dev_texts, dev_labels, dev_ids, output_csv="subtask_1/pred_deu.csv"):
     features, _ = featurize_data(dev_texts, dev_labels)
     features = standardize(features)
 
@@ -240,12 +240,12 @@ def generate_confusion_matrix():
 
     disp = ConfusionMatrixDisplay(confusion_matrix=cm)
     disp.plot()
-    plt.title("Subtask 1: German")
+    plt.title("Subtask 1: English")
     plt.show()
 
 #generate_confusion_matrix()
 
-dev_datapath = "subtask1/dev/eng.csv"
+dev_datapath = "subtask1/dev/deu.csv"
 dev_dataset = pd.read_csv(dev_datapath)
 dev_texts = dev_dataset['text'].values
 dev_labels = dev_dataset['polarization'].values

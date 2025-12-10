@@ -12,7 +12,7 @@ import keyness2
 from sklearn.metrics import f1_score as sklearn_f1, ConfusionMatrixDisplay, multilabel_confusion_matrix
 import matplotlib.pyplot as plt
 
-datapath = "subtask2/train/eng.csv"
+datapath = "subtask2/train/deu.csv"
 
 dataset = pd.read_csv(datapath)
 
@@ -120,13 +120,7 @@ def standardize(features: torch.Tensor) -> torch.Tensor:
 class MultilabelClassifier(torch.nn.Module):
     def __init__(self, input_dim: int):
         super().__init__()
-        # self.net = torch.nn.Sequential(
-        #     torch.nn.Linear(input_dim, 64),
-        #     torch.nn.ReLU(),
-        #     torch.nn.Dropout(0.3),
-        #     torch.nn.Linear(64, 5),
-        #     torch.nn.Sigmoid()
-        # )
+
         self.output_size = 5
         self.coefficients = torch.nn.Linear(input_dim, self.output_size)
         initialize_weights(self.coefficients)
@@ -210,7 +204,7 @@ dev_features, dev_labels_tensor = featurize_data(dev_texts, dev_labels)
 dev_features = standardize(dev_features)
 
 num_features = 5
-num_epochs = 20
+num_epochs = 30
 model = MultilabelClassifier(input_dim=num_features)
 learning_rate = 0.01
 optimizer = make_optimizer(model, learning_rate)
@@ -226,51 +220,18 @@ trained_model, train_losses, dev_losses = training_loop(
     model
 )
 
-def write_final_predictions_csv(model, dev_texts, dev_labels, dev_ids, output_csv="subtask_2/pred_eng.csv"):
+def write_final_predictions_csv(model, dev_texts, dev_labels, dev_ids, output_csv="subtask_2/pred_deu.csv"):
     features, _ = featurize_data(dev_texts, dev_labels)
     features = standardize(features)
-
-
     reassembled = []
     predictions = predict(model, features)
-    print(predictions.shape)
-    print(dev_ids.shape)
 
     arr_2_reshaped = dev_ids.reshape(-1, 1)
-
     reassembled = np.hstack((arr_2_reshaped, predictions))
 
-    # for row in predictions:
-    #     # Unpack the values from each column into the corresponding label variable
-    #     pol_label = row[0]  # The first column for pol_label
-    #     rac_label = row[1]  # The second column for rac_label
-    #     rel_label = row[2]  # The third column for rel_label
-    #     gen_label = row[3]  # The fourth column for gen_label
-    #     other_label = row[4]  # The fifth column for other_label
-    #     reassembled.append([pol_label, rac_label, rel_label, gen_label, other_label])
+    np.savetxt('subtask_2/pred_deu.csv', reassembled, delimiter=',', header='id,political,racial/ethnic,religious,gender/sexual,other', fmt='%s')
 
-    print(reassembled)
-    print(dev_ids)
-
-    np.savetxt('subtask_2/pred_eng.csv', reassembled, delimiter=',', header='id,political,racial/ethnic,religious,gender/sexual,other', fmt='%s')
-
-# def generate_confusion_matrix():
-#     features, _ = featurize_data(dev_texts, dev_labels)
-#     features = standardize(features)
-#
-#     predicted_labels = predict(model, features)
-#
-#     cm = multilabel_confusion_matrix(dev_labels.tolist(), predicted_labels)
-#
-#     disp = ConfusionMatrixDisplay(confusion_matrix=cm)
-#     disp.plot()
-#     plt.title("Subtask 1: English")
-#     plt.show()
-#
-# generate_confusion_matrix()
-
-
-dev_datapath = "subtask2/dev/eng.csv"
+dev_datapath = "subtask2/dev/deu.csv"
 dev_dataset = pd.read_csv(dev_datapath)
 dev_texts = dev_dataset['text'].values
 dev_ids = dev_dataset['id'].values

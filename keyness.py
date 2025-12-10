@@ -1,7 +1,7 @@
 import math
 import pandas as pd
 
-datapath = "subtask1/train/eng.csv"
+datapath = "subtask1/train/deu.csv"
 
 dataset = pd.read_csv(datapath)
 
