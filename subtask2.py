@@ -9,7 +9,8 @@ import random
 from sklearn.model_selection import train_test_split
 import word_count
 import keyness2
-from sklearn.metrics import f1_score as sklearn_f1
+from sklearn.metrics import f1_score as sklearn_f1, ConfusionMatrixDisplay, multilabel_confusion_matrix
+import matplotlib.pyplot as plt
 
 datapath = "subtask2/train/eng.csv"
 
@@ -119,13 +120,13 @@ def standardize(features: torch.Tensor) -> torch.Tensor:
 class MultilabelClassifier(torch.nn.Module):
     def __init__(self, input_dim: int):
         super().__init__()
-        self.net = torch.nn.Sequential(
-            torch.nn.Linear(input_dim, 64),
-            torch.nn.ReLU(),
-            torch.nn.Dropout(0.3),
-            torch.nn.Linear(64, 5),
-            torch.nn.Sigmoid()
-        )
+        # self.net = torch.nn.Sequential(
+        #     torch.nn.Linear(input_dim, 64),
+        #     torch.nn.ReLU(),
+        #     torch.nn.Dropout(0.3),
+        #     torch.nn.Linear(64, 5),
+        #     torch.nn.Sigmoid()
+        # )
         self.output_size = 5
         self.coefficients = torch.nn.Linear(input_dim, self.output_size)
         initialize_weights(self.coefficients)
@@ -251,7 +252,22 @@ def write_final_predictions_csv(model, dev_texts, dev_labels, dev_ids, output_cs
     print(reassembled)
     print(dev_ids)
 
-    np.savetxt('pred_eng.csv', reassembled, delimiter=',', header='id,political,racial/ethnic,religious,gender/sexual,other', fmt='%s')
+    np.savetxt('subtask_2/pred_eng.csv', reassembled, delimiter=',', header='id,political,racial/ethnic,religious,gender/sexual,other', fmt='%s')
+
+# def generate_confusion_matrix():
+#     features, _ = featurize_data(dev_texts, dev_labels)
+#     features = standardize(features)
+#
+#     predicted_labels = predict(model, features)
+#
+#     cm = multilabel_confusion_matrix(dev_labels.tolist(), predicted_labels)
+#
+#     disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+#     disp.plot()
+#     plt.title("Subtask 1: English")
+#     plt.show()
+#
+# generate_confusion_matrix()
 
 
 dev_datapath = "subtask2/dev/eng.csv"
