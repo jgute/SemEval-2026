@@ -1,3 +1,4 @@
+import csv
 import math
 
 import numpy as np
@@ -29,8 +30,6 @@ other_labels = dataset['other'].values
 
 all_texts = dataset['text'].values
 all_labels = np.vstack([political_labels, racial_labels, religious_labels, gender_labels, other_labels]).T
-
-num_features = 10
 
 def split_dataset(texts, labels):
     tr_texts, de_texts, tr_labels, de_labels = train_test_split(texts, labels, test_size=.2, random_state=42)
@@ -227,3 +226,30 @@ trained_model, train_losses, dev_losses = training_loop(
     optimizer,
     model
 )
+
+def write_final_predictions_csv(model, dev_texts, dev_labels, dev_ids, output_csv="subtask_2/pred_eng.csv"):
+    features, _ = featurize_data(dev_texts, dev_labels)
+    features = standardize(features)
+
+    pol_label, rac_label, rel_label, gen_label, other_label = predict(model, features)
+
+    with open(output_csv, mode="w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(["id", "political", "racial/ethnic", "religious", "gender/sexual", "other"])  # header
+        for id_val, pol_label, rac_label, rel_label, gen_label, other_label in zip(dev_ids, pol_label, rac_label, rel_label, gen_label, other_label):
+            writer.writerow([id_val, pol_label, rac_label, rel_label, gen_label, other_label])
+
+
+dev_datapath = "subtask2/dev/eng.csv"
+dev_dataset = pd.read_csv(dev_datapath)
+dev_texts = dev_dataset['text'].values
+dev_ids = dev_dataset['id'].values
+
+political_labels = dataset['political'].values
+racial_labels = dataset['racial/ethnic'].values
+religious_labels = dataset['religious'].values
+gender_labels = dataset['gender/sexual'].values
+other_labels = dataset['other'].values
+all_labels = np.vstack([political_labels, racial_labels, religious_labels, gender_labels, other_labels]).T
+
+write_final_predictions_csv(trained_model, dev_texts, all_labels, dev_ids)
