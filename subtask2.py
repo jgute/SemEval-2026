@@ -15,7 +15,6 @@ datapath = "subtask2/train/eng.csv"
 
 dataset = pd.read_csv(datapath)
 
-#load data into separate pandas dataframes based on corresponding conditions
 political_data = dataset[dataset['political'] == 1]
 racial_data = dataset[dataset['racial/ethnic'] == 1]
 religious_data = dataset[dataset['religious'] == 1]
@@ -204,7 +203,6 @@ def training_loop(
     return model, train_losses, dev_losses
 
 
-# run the model
 train_features, train_labels_tensor = featurize_data(train_texts, train_labels)
 train_features = standardize(train_features)
 dev_features, dev_labels_tensor = featurize_data(dev_texts, dev_labels)
@@ -231,13 +229,29 @@ def write_final_predictions_csv(model, dev_texts, dev_labels, dev_ids, output_cs
     features, _ = featurize_data(dev_texts, dev_labels)
     features = standardize(features)
 
-    pol_label, rac_label, rel_label, gen_label, other_label = predict(model, features)
 
-    with open(output_csv, mode="w", newline="") as file:
-        writer = csv.writer(file)
-        writer.writerow(["id", "political", "racial/ethnic", "religious", "gender/sexual", "other"])  # header
-        for id_val, pol_label, rac_label, rel_label, gen_label, other_label in zip(dev_ids, pol_label, rac_label, rel_label, gen_label, other_label):
-            writer.writerow([id_val, pol_label, rac_label, rel_label, gen_label, other_label])
+    reassembled = []
+    predictions = predict(model, features)
+    print(predictions.shape)
+    print(dev_ids.shape)
+
+    arr_2_reshaped = dev_ids.reshape(-1, 1)
+
+    reassembled = np.hstack((arr_2_reshaped, predictions))
+
+    # for row in predictions:
+    #     # Unpack the values from each column into the corresponding label variable
+    #     pol_label = row[0]  # The first column for pol_label
+    #     rac_label = row[1]  # The second column for rac_label
+    #     rel_label = row[2]  # The third column for rel_label
+    #     gen_label = row[3]  # The fourth column for gen_label
+    #     other_label = row[4]  # The fifth column for other_label
+    #     reassembled.append([pol_label, rac_label, rel_label, gen_label, other_label])
+
+    print(reassembled)
+    print(dev_ids)
+
+    np.savetxt('pred_eng.csv', reassembled, delimiter=',', header='id,political,racial/ethnic,religious,gender/sexual,other', fmt='%s')
 
 
 dev_datapath = "subtask2/dev/eng.csv"
