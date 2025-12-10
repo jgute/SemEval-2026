@@ -2,9 +2,11 @@ import math
 import pandas as pd
 import numpy as np
 
-datapath = "subtask2/train/eng.csv"
+eng_datapath = "subtask2/train/eng.csv"
+spa_datapath = "subtask2/train/spa.csv"
+deu_datapath = "subtask2/train/deu.csv"
 
-dataset = pd.read_csv(datapath)
+dataset = pd.read_csv(deu_datapath)
 
 #load data into separate pandas dataframes based on corresponding conditions
 political_data = dataset[dataset['political'] == 1]
